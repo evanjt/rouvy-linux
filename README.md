@@ -11,6 +11,31 @@ A proof of concept. Not affiliated with Rouvy or the Wine project.
 
 ## Install
 
+Install the build dependencies first. Arch:
+
+```bash
+sudo pacman -S --needed base-devel git mingw-w64-gcc bluez bluez-utils \
+    dbus gnutls freetype2 fontconfig libx11 libxext libxrandr libxi \
+    libxcursor libxinerama libxcomposite libxrender libxfixes wayland \
+    libxkbcommon mesa vulkan-icd-loader libpulse alsa-lib \
+    gst-plugins-base-libs
+```
+
+Ubuntu 24.04 or newer, Debian 13 or newer:
+
+```bash
+sudo apt install build-essential git gcc-mingw-w64 g++-mingw-w64 bison \
+    flex gettext pkg-config bluez libdbus-1-dev libgnutls28-dev \
+    libfreetype-dev libfontconfig-dev libx11-dev libxext-dev \
+    libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev \
+    libxcomposite-dev libxrender-dev libxfixes-dev libwayland-dev \
+    libxkbcommon-dev libxkbregistry-dev libgl-dev libegl-dev \
+    libvulkan-dev libpulse-dev libasound2-dev libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev
+```
+
+Then:
+
 ```bash
 git clone https://github.com/evanjt/rouvy-linux.git
 cd rouvy-linux/scripts

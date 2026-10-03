@@ -125,6 +125,9 @@ if [[ -n $INSTALLER ]]; then
     echo "Wine output: $INSTALL_LOG"
     wine "$INSTALLER" >>"$INSTALL_LOG" 2>&1
     wineserver -w
+    # Rouvy registers com.rouvy:// after wineboot made the link handlers, so the first login needs them made again.
+    wine winemenubuilder -a >>"$INSTALL_LOG" 2>&1
+    wineserver -w
     rewrite_wine_entries
     copy_rouvy_icon
     exit 0
@@ -158,10 +161,16 @@ cd "$APP" || exit 1
 [[ $CAPTURE == 1 ]] || exec "${INHIBIT[@]}" wine Rouvy.exe >"$LOG" 2>&1
 "${INHIBIT[@]}" wine Rouvy.exe >"$LOG" 2>&1 &
 ROUVY_PID=$!
+echo "Capturing BlueZ into $CAPTURE_DIR until Rouvy quits"
 "$ROOT/scripts/capture-bluez.sh" "$CAPTURE_DIR" --while "$ROUVY_PID" &
 CAPTURE_PID=$!
+# Rouvy can take minutes to exit after its window closes, so its quit message ends the capture.
+ROUVY_APP_LOG="$WINEPREFIX/drive_c/users/$(id -un)/AppData/LocalLow/VirtualTraining/ROUVY/rouvy.log"
+{
+    grep -q -m1 'AppBootstrapper.Quitting' < <(tail -n0 -F --pid="$ROUVY_PID" "$ROUVY_APP_LOG" 2>/dev/null) \
+        && kill -TERM "$CAPTURE_PID" 2>/dev/null
+} &
 trap 'kill "$ROUVY_PID" 2>/dev/null' INT TERM
-wait "$ROUVY_PID"
 wait "$CAPTURE_PID"
 echo "Capture: $CAPTURE_DIR"
 echo "It holds every address the adapter heard. tools/capture-to-fixture.py keeps only the sensors you name."

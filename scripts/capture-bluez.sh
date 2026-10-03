@@ -48,7 +48,7 @@ hci_trace() {
     : > "$OUT/hci.btsnoop"
     : > "$OUT/btmon.err"
     rm -f "$OUT/stop"
-    "${runner[@]}" sh -c 'btmon -w "$1" > /dev/null 2> "$2" & until [ -e "$3" ]; do sleep 1; done; kill $!; wait $!' \
+    "${runner[@]}" sh -c 'btmon -w "$1" > /dev/null 2> "$2" & until [ -e "$3" ]; do sleep 1; done; kill $! 2>/dev/null; wait $!' \
         sh "$OUT/hci.btsnoop" "$OUT/btmon.err" "$OUT/stop" &
     HCI_PID=$!
 }

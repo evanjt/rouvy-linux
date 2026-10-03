@@ -126,10 +126,11 @@ check_deps() {
         done
         if [[ ${#missing[@]} -gt 0 ]]; then
             warn "Missing: ${missing[*]}"
-            note "Install Wine's build dependencies, then run this again:"
-            note "  Arch:          sudo pacman -S --needed base-devel git bison flex mingw-w64-gcc dbus bluez bluez-utils"
-            note "  Debian/Ubuntu: sudo apt build-dep wine && sudo apt install git gcc-mingw-w64"
-            note "  Fedora:        sudo dnf builddep wine && sudo dnf install git mingw64-gcc mingw32-gcc"
+            note "Install the build dependencies, then run this again. Arch:"
+            note "  sudo pacman -S --needed base-devel git mingw-w64-gcc bluez bluez-utils dbus gnutls freetype2 fontconfig libx11 libxext libxrandr libxi libxcursor libxinerama libxcomposite libxrender libxfixes wayland libxkbcommon mesa vulkan-icd-loader libpulse alsa-lib gst-plugins-base-libs"
+            note "Ubuntu 24.04 or newer, Debian 13 or newer:"
+            note "  sudo apt install build-essential git gcc-mingw-w64 g++-mingw-w64 bison flex gettext pkg-config bluez libdbus-1-dev libgnutls28-dev libfreetype-dev libfontconfig-dev libx11-dev libxext-dev libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev libxcomposite-dev libxrender-dev libxfixes-dev libwayland-dev libxkbcommon-dev libxkbregistry-dev libgl-dev libegl-dev libvulkan-dev libpulse-dev libasound2-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev"
+            note "Other distros: Wine's own build dependencies, plus git and the MinGW C and C++ cross compilers."
             exit 1
         fi
         note "build tools found"
