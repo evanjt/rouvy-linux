@@ -15,12 +15,15 @@ A proof of concept. Not affiliated with Rouvy or the Wine project.
 git clone https://github.com/evanjt/rouvy-linux.git
 cd rouvy-linux/scripts
 wget https://cdn.rouvy.com/update/Rouvy_Installer.exe
-./install.sh --installer Rouvy_Installer.exe
+./install.sh
 ```
 
-`install.sh` downloads a prebuilt patched Wine (x86_64, glibc 2.35 or
-newer), checks it runs, then runs the Rouvy installer. When the installer
-starts Rouvy, close it. Everything goes under `~/.local/share/rouvy-linux`.
+`install.sh` finds the newest Rouvy installer in its directory or in
+Downloads, by the version inside it. `--installer FILE` picks one. It
+downloads a prebuilt patched Wine (x86_64, glibc 2.35 or newer) and
+checks it runs. Without one it builds Wine from source, see below. Then
+it runs the Rouvy installer silently. Everything goes under
+`~/.local/share/rouvy-linux`.
 
 Start Rouvy and log in:
 
@@ -28,8 +31,8 @@ Start Rouvy and log in:
 rouvy
 ```
 
-The Rouvy entry in your application menu and the desktop shortcut the
-installer adds work too. All of them run the patched Wine.
+The Rouvy entry in your application menu works too. Both run the patched
+Wine.
 
 If the download link stops working, get the installer from your Rouvy
 account with your browser's user agent set to Windows.
@@ -39,8 +42,9 @@ prefixes keep theirs.
 
 ### Build Wine from source
 
-On an older or non-x86_64 system, or to build Wine yourself, install the
-build dependencies and add `--build`. Arch:
+The install builds Wine itself when the prebuilt one can't run, on an
+older or non-x86_64 system for example. `--build` builds it anyway. Both
+need the build dependencies first. Arch:
 
 ```bash
 sudo pacman -S --needed base-devel git mingw-w64-gcc bluez bluez-utils \
@@ -66,7 +70,7 @@ sudo apt install build-essential git gcc-mingw-w64 g++-mingw-w64 bison \
 Then:
 
 ```bash
-./install.sh --build --installer Rouvy_Installer.exe
+./install.sh --build
 ```
 
 The build takes minutes on a fast machine, up to an hour on a slow one.
@@ -77,7 +81,7 @@ Needs BlueZ 5.48 or newer.
 
 | Rouvy | rouvy-linux | Wine fork | BlueZ | Kernel |
 |---|---|---|---|---|
-| 4.7.2.541 | v0.1.0 | wine-11.18-rouvy-0.1.0 | 5.87 | 7.2 |
+| 4.7.2.541 | v0.1.1 | wine-11.18-rouvy-0.1.0 | 5.87 | 7.2 |
 
 Rouvy updates itself, so the launcher warns when the installed version
 is not the one above.

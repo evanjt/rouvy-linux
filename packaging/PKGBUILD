@@ -30,7 +30,7 @@ options=(!lto !staticlibs pestrip)
 
 # The fork tag is wine-<base>-rouvy-<release>. makepkg forbids hyphens in pkgver.
 _winetag="wine-${pkgver/.rouvy/-rouvy-}"
-_launcher=v0.1.0
+_launcher=v0.1.1
 
 depends=(
   attr

@@ -71,7 +71,7 @@ pkgbase = wine-rouvy
 	options = !staticlibs
 	options = pestrip
 	source = wine::git+https://github.com/evanjt/wine.git#tag=wine-11.18-rouvy-0.1.0
-	source = rouvy-linux::git+https://github.com/evanjt/rouvy-linux.git#tag=v0.1.0
+	source = rouvy-linux::git+https://github.com/evanjt/rouvy-linux.git#tag=v0.1.1
 	sha512sums = SKIP
 	sha512sums = SKIP
 

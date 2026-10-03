@@ -123,9 +123,9 @@ if [[ -n $INSTALLER ]]; then
     # The Rouvy BLE plugin only enables its WinRT path on Windows 10.
     winecfg -v win10 >>"$INSTALL_LOG" 2>&1
     wineserver -w
-    echo "Running the Rouvy installer. When it finishes and starts Rouvy, close Rouvy."
-    echo "Wine output: $INSTALL_LOG"
-    wine "$INSTALLER" >>"$INSTALL_LOG" 2>&1
+    echo "Running the Rouvy installer. Wine output: $INSTALL_LOG"
+    # Silent, so the installer doesn't start Rouvy when it finishes.
+    wine "$INSTALLER" /S >>"$INSTALL_LOG" 2>&1
     wineserver -w
     rewrite_wine_entries
     copy_rouvy_icon

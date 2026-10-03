@@ -8,30 +8,36 @@
 #   ├── wine/        the patched Wine, bin/wine lives here
 #   ├── prefix/      WINEPREFIX with Rouvy inside
 #   ├── downloads/   the release tarball
-#   ├── wine-src/    with --build, Wine checkout at the pinned fork tag
-#   ├── wine-build/  with --build, out of tree build, safe to delete afterwards
+#   ├── wine-src/    when building, Wine checkout at the pinned fork tag
+#   ├── wine-build/  when building, out of tree build, safe to delete afterwards
 #   └── logs/
 #
 # Usage:
-#   scripts/install.sh --installer Rouvy_Installer.exe            prebuilt Wine from the release
-#   scripts/install.sh --build --installer Rouvy_Installer.exe    build Wine from source
+#   scripts/install.sh                                            prebuilt Wine, or a build when there is none
+#   scripts/install.sh --build                                    build Wine from source
+#   scripts/install.sh --installer Rouvy_Installer.exe            this installer, not the newest one found
 #   scripts/install.sh --uninstall
 set -Eeuo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
 ROUVY_HOME="${ROUVY_HOME:-$HOME/.local/share/rouvy-linux}"
-RELEASE="${ROUVY_RELEASE:-v0.1.0}"
+RELEASE="${ROUVY_RELEASE:-v0.1.1}"
 RELEASE_URL="https://github.com/evanjt/rouvy-linux/releases/download/$RELEASE"
 MIN_GLIBC=2.35
 WINE_REPO="${WINE_REPO:-https://github.com/evanjt/wine.git}"
 WINE_REF="${WINE_REF:-wine-11.18-rouvy-0.1.0}"
 JOBS="${JOBS:-$(nproc)}"
+# The Wine Mono the fork expects, from dlls/appwiz.cpl/addons.c.
+MONO_VERSION=11.3.0
+MONO_SHA=df2dfc1665c2511882e7cabd56eafd0c0a3d94e5a7e86f969277f6c189d418d3
 INSTALLER=""
+INSTALLER_VERSION=""
 TARBALL=""
 MODE=tarball
 UNINSTALL=0
+NO_PREBUILT=""
 
-usage() { sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+usage() { sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -76,6 +82,26 @@ note() { printf '      %s\n' "$*"; }
 warn() { printf '      \033[33m%s\033[0m\n' "$*" >&2; }
 fail() { printf '      \033[31m%s\033[0m\n' "$*" >&2; exit 1; }
 clock() { printf '%d:%02d' $(($1 / 60)) $(($1 % 60)); }
+
+# The newest Rouvy installer in this directory, beside this script or in Downloads, as "version path".
+# Windows version info sits near the start of the file in UTF-16, so dropping the NULs makes it greppable.
+find_installer() {
+    local dir f info ver best="" best_ver=""
+    for dir in "$PWD" "$ROOT/scripts" "$(xdg-user-dir DOWNLOAD 2>/dev/null || echo "$HOME/Downloads")"; do
+        for f in "$dir"/*.exe; do
+            [[ -f $f ]] || continue
+            info=$(head -c 4M "$f" | tr -d '\0' | grep -aoE 'ProductNameRouvy|ProductVersion[0-9.]+' || true)
+            [[ $info == *ProductNameRouvy* ]] || continue
+            ver=$(sed -n 's/^ProductVersion//p' <<<"$info" | head -n1)
+            [[ -n $ver ]] || continue
+            if [[ -z $best || $(printf '%s\n%s\n' "$best_ver" "$ver" | sort -V | tail -n1) != "$best_ver" ]]; then
+                best=$f best_ver=$ver
+            fi
+        done
+    done
+    [[ -n $best ]] && echo "$best_ver $best"
+    return 0
+}
 
 # Every file this install left outside ROUVY_HOME: ours, Wine's for our prefix, and Rouvy's shortcut,
 # icon and menu files once nothing else uses them. Other Wine prefixes keep theirs.
@@ -175,20 +201,28 @@ check_bluetooth() {
     fi
 }
 
+# A tarball given with --tarball has to work. Without one, the install builds Wine instead.
+no_prebuilt() {
+    [[ -n $TARBALL ]] && fail "$1"
+    NO_PREBUILT=$1
+}
+
 # The tarball is built on Ubuntu 22.04, and Wine loads the desktop libraries it needs at run time.
 check_system() {
     step "Check system"
-    [[ $(uname -m) == x86_64 ]] || fail "The prebuilt Wine is x86_64 only. Build it with --build."
+    [[ $(uname -m) == x86_64 ]] || { no_prebuilt "The prebuilt Wine is x86_64 only."; return; }
     local glibc
     glibc=$(ldd --version 2>/dev/null | head -n1 | grep -oE '[0-9]+\.[0-9]+$' || true)
     if [[ -z $glibc || $(printf '%s\n%s\n' "$MIN_GLIBC" "$glibc" | sort -V | head -n1) != "$MIN_GLIBC" ]]; then
-        fail "The prebuilt Wine needs glibc $MIN_GLIBC or newer, this system has ${glibc:-an unknown version}. Build it with --build."
+        no_prebuilt "The prebuilt Wine needs glibc $MIN_GLIBC or newer, this system has ${glibc:-an unknown version}."
+        return
     fi
     note "x86_64, glibc $glibc"
     if [[ -z $TARBALL ]] && ! command -v curl >/dev/null && ! command -v wget >/dev/null; then
-        fail "Needs curl or wget to download Wine."
+        no_prebuilt "Needs curl or wget to download Wine."
+        return
     fi
-    command -v xz >/dev/null || fail "Needs xz to unpack Wine."
+    command -v xz >/dev/null || { no_prebuilt "Needs xz to unpack Wine."; return; }
     local libs missing=()
     libs=$( (ldconfig -p 2>/dev/null || /sbin/ldconfig -p 2>/dev/null) || true)
     for lib in libdbus-1.so.3 libgnutls.so.30 libfreetype.so.6; do
@@ -242,9 +276,13 @@ download_wine() {
         mkdir -p "$DOWNLOADS"
         tarball="$DOWNLOADS/$TARBALL_NAME"
         note "$RELEASE_URL/$TARBALL_NAME"
-        fetch "$RELEASE_URL/$TARBALL_NAME" "$tarball" || fail "Download failed. Build Wine instead with --build."
-        fetch "$RELEASE_URL/$TARBALL_NAME.sha256" "$tarball.sha256" || fail "Checksum download failed."
-        (cd "$DOWNLOADS" && sha256sum --quiet -c "$TARBALL_NAME.sha256") || fail "Checksum mismatch, delete $(tilde "$tarball") and run this again."
+        fetch "$RELEASE_URL/$TARBALL_NAME" "$tarball" || { no_prebuilt "No prebuilt Wine for $RELEASE."; return; }
+        fetch "$RELEASE_URL/$TARBALL_NAME.sha256" "$tarball.sha256" || { no_prebuilt "No checksum for the prebuilt Wine."; return; }
+        if ! (cd "$DOWNLOADS" && sha256sum --quiet -c "$TARBALL_NAME.sha256"); then
+            rm -f "$tarball"
+            no_prebuilt "The prebuilt Wine does not match its checksum."
+            return
+        fi
         note "checksum matches"
     else
         [[ -f $tarball ]] || fail "No tarball at $tarball"
@@ -257,7 +295,11 @@ download_wine() {
     run "$LOGS/unpack.log" 0 tar -xJf "$tarball" --strip-components=1 -C "$fresh"
     rm -rf "$WINE_DIR"
     mv "$fresh" "$WINE_DIR"
-    "$WINE_DIR/bin/wine" --version >/dev/null 2>&1 || fail "The prebuilt Wine does not run here. Build it instead with --build."
+    if ! "$WINE_DIR/bin/wine" --version >/dev/null 2>&1; then
+        rm -rf "$WINE_DIR"
+        no_prebuilt "The prebuilt Wine does not run here."
+        return
+    fi
     note "$("$WINE_DIR/bin/wine" --version)"
 }
 
@@ -317,16 +359,41 @@ EOF
     note "launcher $(tilde "$LAUNCHER"), menu entry $(tilde "$DESKTOP")"
 }
 
+# Wine looks for Mono in its own data directory first, so the prefix gets it without asking.
+add_mono() {
+    local dir="$WINE_DIR/share/wine/mono" msi="wine-mono-$MONO_VERSION-x86.msi"
+    [[ -f $dir/$msi ]] && return
+    mkdir -p "$dir"
+    if [[ -f $HOME/.cache/wine/$msi ]]; then
+        cp "$HOME/.cache/wine/$msi" "$dir/$msi.part"
+    else
+        note "downloading Wine Mono $MONO_VERSION"
+        fetch "https://dl.winehq.org/wine/wine-mono/$MONO_VERSION/$msi" "$dir/$msi.part" || true
+    fi
+    if [[ $(sha256sum "$dir/$msi.part" 2>/dev/null | cut -d' ' -f1) == "$MONO_SHA" ]]; then
+        mv "$dir/$msi.part" "$dir/$msi"
+        note "Wine Mono $MONO_VERSION"
+    else
+        rm -f "$dir/$msi.part"
+        warn "No Wine Mono, Wine will offer to download it when it makes the prefix"
+    fi
+}
+
 install_rouvy() {
     step "Install Rouvy"
     install_launcher
+    add_mono
     if [[ -z "$INSTALLER" ]]; then
-        note "No --installer given. Download the Rouvy installer later and run:"
+        note "No Rouvy installer found here or in Downloads. Download it and run this again, or later:"
         note "  rouvy --installer /path/to/Rouvy_Installer.exe"
         return
     fi
     ROUVY_HOME="$ROUVY_HOME" ROUVY_LAUNCHER="$LAUNCHER" "$ROOT/scripts/rouvy.sh" --installer "$INSTALLER" | sed 's/^/      /'
 }
+
+if [[ -z $INSTALLER ]]; then
+    read -r INSTALLER_VERSION INSTALLER < <(find_installer) || true
+fi
 
 mkdir -p "$LOGS"
 printf '\033[1mrouvy-linux installer\033[0m\n'
@@ -342,12 +409,17 @@ note "Wine         $(tilde "$WINE_DIR")"
 note "prefix       $(tilde "$PREFIX")"
 note "logs         $(tilde "$LOGS")"
 note "launcher     $(tilde "$LAUNCHER")"
-note "installer    $(tilde "${INSTALLER:-none, Rouvy is not installed this run}")"
+note "installer    $(tilde "${INSTALLER:-none found, Rouvy is not installed this run}")${INSTALLER_VERSION:+, Rouvy $INSTALLER_VERSION}"
+if [[ $MODE == tarball ]]; then
+    check_system
+    if [[ -z $NO_PREBUILT ]]; then download_wine; fi
+    if [[ -n $NO_PREBUILT ]]; then
+        warn "$NO_PREBUILT Building Wine from source instead."
+        MODE=build
+        STEPS=$((STEP + 6))
+    fi
+fi
 case $MODE in
-    tarball)
-        check_system
-        download_wine
-        ;;
     build)
         check_build_tools
         fetch_source
