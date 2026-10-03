@@ -1,0 +1,793 @@
+{
+ "source": "hrm600-confirm-2026-09-18.json",
+ "adapter": {
+  "Address": "C0:FF:EE:00:00:00",
+  "AddressType": "public",
+  "Name": "adapter",
+  "Alias": "adapter",
+  "Class": 7078148,
+  "Powered": true,
+  "PowerState": "on",
+  "Discoverable": false,
+  "Pairable": true,
+  "Discovering": true,
+  "UUIDs": [
+   "0000110e-0000-1000-8000-00805f9b34fb",
+   "0000111f-0000-1000-8000-00805f9b34fb",
+   "00001200-0000-1000-8000-00805f9b34fb",
+   "0000110b-0000-1000-8000-00805f9b34fb",
+   "0000110a-0000-1000-8000-00805f9b34fb",
+   "0000110c-0000-1000-8000-00805f9b34fb",
+   "00001800-0000-1000-8000-00805f9b34fb",
+   "00001801-0000-1000-8000-00805f9b34fb",
+   "0000180a-0000-1000-8000-00805f9b34fb",
+   "03b80e5a-ede8-4b33-a751-6ce34ec4c700",
+   "0000111e-0000-1000-8000-00805f9b34fb"
+  ],
+  "Roles": [
+   "central",
+   "peripheral"
+  ],
+  "Manufacturer": 2,
+  "Version": 11,
+  "path": "/org/bluez/hci0"
+ },
+ "devices": {
+  "C0:FF:EE:00:00:02": {
+   "Address": "C0:FF:EE:00:00:02",
+   "Name": "Bonded HRM",
+   "Alias": "Bonded HRM",
+   "UUIDs": [
+    "00001800-0000-1000-8000-00805f9b34fb",
+    "00001801-0000-1000-8000-00805f9b34fb",
+    "0000180a-0000-1000-8000-00805f9b34fb",
+    "0000180d-0000-1000-8000-00805f9b34fb",
+    "0000180f-0000-1000-8000-00805f9b34fb",
+    "00001814-0000-1000-8000-00805f9b34fb",
+    "0000fe1f-0000-1000-8000-00805f9b34fb",
+    "6a4e2800-667b-11e3-949a-0800200c9a66"
+   ],
+   "ManufacturerData": {
+    "135": "11ff"
+   },
+   "ServiceData": {
+    "0000fe1f-0000-1000-8000-00805f9b34fb": "000000"
+   },
+   "RSSI": -87,
+   "Connected": true,
+   "ServicesResolved": true,
+   "Paired": false,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02",
+   "services": [
+    {
+     "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0001",
+     "uuid": "00001800-0000-1000-8000-00805f9b34fb",
+     "handle": 1,
+     "primary": true,
+     "characteristics": [
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0001/char0002",
+       "uuid": "00002a00-0000-1000-8000-00805f9b34fb",
+       "handle": 2,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0001/char0004",
+       "uuid": "00002a01-0000-1000-8000-00805f9b34fb",
+       "handle": 4,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0001/char0006",
+       "uuid": "00002a04-0000-1000-8000-00805f9b34fb",
+       "handle": 6,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0001/char0008",
+       "uuid": "00002aa6-0000-1000-8000-00805f9b34fb",
+       "handle": 8,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      }
+     ]
+    },
+    {
+     "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000a",
+     "uuid": "00001801-0000-1000-8000-00805f9b34fb",
+     "handle": 10,
+     "primary": true,
+     "characteristics": [
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000a/char000b",
+       "uuid": "00002a05-0000-1000-8000-00805f9b34fb",
+       "handle": 11,
+       "flags": [
+        "indicate"
+       ],
+       "value": "",
+       "descriptors": [
+        {
+         "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000a/char000b/desc000d",
+         "uuid": "00002902-0000-1000-8000-00805f9b34fb",
+         "handle": 13
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e",
+     "uuid": "6a4e2800-667b-11e3-949a-0800200c9a66",
+     "handle": 14,
+     "primary": true,
+     "characteristics": [
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char000f",
+       "uuid": "6a4e2803-667b-11e3-949a-0800200c9a66",
+       "handle": 15,
+       "flags": [
+        "read",
+        "write-without-response",
+        "write"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char0011",
+       "uuid": "6a4e2810-667b-11e3-949a-0800200c9a66",
+       "handle": 17,
+       "flags": [
+        "read",
+        "write-without-response",
+        "write",
+        "notify"
+       ],
+       "value": "",
+       "descriptors": [
+        {
+         "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char0011/desc0013",
+         "uuid": "00002902-0000-1000-8000-00805f9b34fb",
+         "handle": 19
+        }
+       ]
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char0014",
+       "uuid": "6a4e2820-667b-11e3-949a-0800200c9a66",
+       "handle": 20,
+       "flags": [
+        "write-without-response",
+        "write"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char0016",
+       "uuid": "6a4e2811-667b-11e3-949a-0800200c9a66",
+       "handle": 22,
+       "flags": [
+        "read",
+        "write-without-response",
+        "write",
+        "notify"
+       ],
+       "value": "",
+       "descriptors": [
+        {
+         "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char0016/desc0018",
+         "uuid": "00002902-0000-1000-8000-00805f9b34fb",
+         "handle": 24
+        }
+       ]
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char0019",
+       "uuid": "6a4e2821-667b-11e3-949a-0800200c9a66",
+       "handle": 25,
+       "flags": [
+        "write-without-response",
+        "write"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char001b",
+       "uuid": "6a4e2812-667b-11e3-949a-0800200c9a66",
+       "handle": 27,
+       "flags": [
+        "read",
+        "write-without-response",
+        "write",
+        "notify"
+       ],
+       "value": "",
+       "descriptors": [
+        {
+         "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char001b/desc001d",
+         "uuid": "00002902-0000-1000-8000-00805f9b34fb",
+         "handle": 29
+        }
+       ]
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service000e/char001e",
+       "uuid": "6a4e2822-667b-11e3-949a-0800200c9a66",
+       "handle": 30,
+       "flags": [
+        "write-without-response",
+        "write"
+       ],
+       "value": "",
+       "descriptors": []
+      }
+     ]
+    },
+    {
+     "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0020",
+     "uuid": "0000180a-0000-1000-8000-00805f9b34fb",
+     "handle": 32,
+     "primary": true,
+     "characteristics": [
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0020/char0021",
+       "uuid": "00002a29-0000-1000-8000-00805f9b34fb",
+       "handle": 33,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0020/char0023",
+       "uuid": "00002a24-0000-1000-8000-00805f9b34fb",
+       "handle": 35,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0020/char0025",
+       "uuid": "00002a25-0000-1000-8000-00805f9b34fb",
+       "handle": 37,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0020/char0027",
+       "uuid": "00002a27-0000-1000-8000-00805f9b34fb",
+       "handle": 39,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0020/char0029",
+       "uuid": "00002a26-0000-1000-8000-00805f9b34fb",
+       "handle": 41,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0020/char002b",
+       "uuid": "00002a28-0000-1000-8000-00805f9b34fb",
+       "handle": 43,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      }
+     ]
+    },
+    {
+     "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service002d",
+     "uuid": "0000180f-0000-1000-8000-00805f9b34fb",
+     "handle": 45,
+     "primary": true,
+     "characteristics": [
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service002d/char002e",
+       "uuid": "00002a19-0000-1000-8000-00805f9b34fb",
+       "handle": 46,
+       "flags": [
+        "read",
+        "notify"
+       ],
+       "value": "35",
+       "descriptors": [
+        {
+         "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service002d/char002e/desc0030",
+         "uuid": "00002902-0000-1000-8000-00805f9b34fb",
+         "handle": 48
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031",
+     "uuid": "0000180d-0000-1000-8000-00805f9b34fb",
+     "handle": 49,
+     "primary": true,
+     "characteristics": [
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+       "uuid": "00002a37-0000-1000-8000-00805f9b34fb",
+       "handle": 50,
+       "flags": [
+        "notify"
+       ],
+       "value": "1086c501",
+       "descriptors": [
+        {
+         "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032/desc0034",
+         "uuid": "00002902-0000-1000-8000-00805f9b34fb",
+         "handle": 52
+        }
+       ],
+       "auth": true
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0035",
+       "uuid": "00002a38-0000-1000-8000-00805f9b34fb",
+       "handle": 53,
+       "flags": [
+        "read"
+       ],
+       "value": "01",
+       "descriptors": []
+      }
+     ]
+    },
+    {
+     "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037",
+     "uuid": "00001814-0000-1000-8000-00805f9b34fb",
+     "handle": 55,
+     "primary": true,
+     "characteristics": [
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char0038",
+       "uuid": "00002a54-0000-1000-8000-00805f9b34fb",
+       "handle": 56,
+       "flags": [
+        "read"
+       ],
+       "value": "",
+       "descriptors": []
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+       "uuid": "00002a53-0000-1000-8000-00805f9b34fb",
+       "handle": 58,
+       "flags": [
+        "notify"
+       ],
+       "value": "00c10259",
+       "descriptors": [
+        {
+         "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a/desc003c",
+         "uuid": "00002902-0000-1000-8000-00805f9b34fb",
+         "handle": 60
+        }
+       ]
+      },
+      {
+       "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003d",
+       "uuid": "00002a5d-0000-1000-8000-00805f9b34fb",
+       "handle": 61,
+       "flags": [
+        "read"
+       ],
+       "value": "0e",
+       "descriptors": []
+      }
+     ]
+    }
+   ],
+   "pairing": {
+    "method": "confirm",
+    "passkey": 123456
+   }
+  }
+ },
+ "events": [
+  {
+   "t": 0.0,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108cb601"
+   }
+  },
+  {
+   "t": 0.180875,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "000b0129"
+   }
+  },
+  {
+   "t": 0.360822,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108cb501"
+   }
+  },
+  {
+   "t": 0.720863,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "000b0129"
+   }
+  },
+  {
+   "t": 0.899823,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108cb101"
+   }
+  },
+  {
+   "t": 1.260831,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00f80026"
+   }
+  },
+  {
+   "t": 1.439863,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db201"
+   }
+  },
+  {
+   "t": 1.7998,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00f80026"
+   }
+  },
+  {
+   "t": 1.889839,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db101"
+   }
+  },
+  {
+   "t": 2.249808,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00f80026"
+   }
+  },
+  {
+   "t": 2.429837,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108eb201"
+   }
+  },
+  {
+   "t": 2.514627,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02",
+   "interface": "org.bluez.Device1",
+   "changed": {
+    "RSSI": -72
+   }
+  },
+  {
+   "t": 2.789831,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00f80026"
+   }
+  },
+  {
+   "t": 2.879843,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108eb201"
+   }
+  },
+  {
+   "t": 3.239804,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00000000"
+   }
+  },
+  {
+   "t": 3.421804,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108eb101"
+   }
+  },
+  {
+   "t": 3.780826,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00000000"
+   }
+  },
+  {
+   "t": 3.807708,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02",
+   "interface": "org.bluez.Device1",
+   "changed": {
+    "RSSI": -71
+   }
+  },
+  {
+   "t": 3.869801,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108eb201"
+   }
+  },
+  {
+   "t": 4.230808,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00000000"
+   }
+  },
+  {
+   "t": 4.409856,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108eb301"
+   }
+  },
+  {
+   "t": 4.67982,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00260006"
+   }
+  },
+  {
+   "t": 4.861057,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108eb101"
+   }
+  },
+  {
+   "t": 5.098772,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02",
+   "interface": "org.bluez.Device1",
+   "changed": {
+    "RSSI": -71
+   }
+  },
+  {
+   "t": 5.219821,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00260006"
+   }
+  },
+  {
+   "t": 5.399886,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108eb101"
+   }
+  },
+  {
+   "t": 5.759831,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00710011"
+   }
+  },
+  {
+   "t": 5.939849,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108eb501"
+   }
+  },
+  {
+   "t": 6.20983,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00710011"
+   }
+  },
+  {
+   "t": 6.479898,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db501"
+   }
+  },
+  {
+   "t": 6.750887,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "009c0018"
+   }
+  },
+  {
+   "t": 6.929906,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db401"
+   }
+  },
+  {
+   "t": 7.199898,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "009c0018"
+   }
+  },
+  {
+   "t": 7.379828,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db201"
+   }
+  },
+  {
+   "t": 7.678757,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02",
+   "interface": "org.bluez.Device1",
+   "changed": {
+    "RSSI": -70
+   }
+  },
+  {
+   "t": 7.741049,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00e40023"
+   }
+  },
+  {
+   "t": 7.919856,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db401"
+   }
+  },
+  {
+   "t": 8.189882,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "002a012e"
+   }
+  },
+  {
+   "t": 8.369879,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db401"
+   }
+  },
+  {
+   "t": 8.729895,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "002a012e"
+   }
+  },
+  {
+   "t": 8.909898,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db201"
+   }
+  },
+  {
+   "t": 8.963775,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02",
+   "interface": "org.bluez.Device1",
+   "changed": {
+    "RSSI": -78
+   }
+  },
+  {
+   "t": 9.179857,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00660137"
+   }
+  },
+  {
+   "t": 9.360625,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db401"
+   }
+  },
+  {
+   "t": 9.719894,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0037/char003a",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "00c40146"
+   }
+  },
+  {
+   "t": 9.900851,
+   "path": "/org/bluez/hci0/dev_C0_FF_EE_00_00_02/service0031/char0032",
+   "interface": "org.bluez.GattCharacteristic1",
+   "changed": {
+    "Value": "108db501"
+   }
+  }
+ ]
+}

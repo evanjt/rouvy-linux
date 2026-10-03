@@ -1,0 +1,17 @@
+CLAUDE.md
+.claude/
+*.log.gz
+runs/
+tools/*.exe
+tools/*.exe.so
+captures/
+# Source only. Compiled binaries and Rouvy's own files never enter the repository.
+*.dll
+*.dll.so
+*.so
+*.sys
+*.cpl
+*.exe
+*.msi
+Rouvy_Data/
+__pycache__/

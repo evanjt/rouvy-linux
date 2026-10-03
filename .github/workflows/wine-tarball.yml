@@ -1,0 +1,121 @@
+# Build the patched Wine fork and publish it as a relocatable tarball.
+#
+# Runs in an Ubuntu 22.04 container so the binaries link against glibc
+# 2.35 and run on anything newer. A tag push publishes the tarball on the
+# release, a manual run keeps it as a workflow artefact.
+name: Wine tarball
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      wine_ref:
+        description: Tag or branch of the Wine fork to build
+        default: wine-11.18-rouvy-0.1.0
+
+env:
+  WINE_REPO: https://github.com/evanjt/wine.git
+  WINE_TAG: wine-11.18-rouvy-0.1.0
+  PREFIX: /opt/wine-rouvy
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ubuntu:22.04
+    timeout-minutes: 360
+    outputs:
+      tarball: ${{ steps.pack.outputs.tarball }}
+    steps:
+      - name: Build dependencies
+        run: |
+          sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get build-dep -y wine
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            git ccache xz-utils gcc-mingw-w64 libdbus-1-dev
+          update-ccache-symlinks
+
+      - name: Choose the Wine ref
+        id: ref
+        run: |
+          ref="${{ inputs.wine_ref || env.WINE_TAG }}"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "tag=${{ github.ref_type == 'tag' && github.ref_name || '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Clone the Wine fork
+        run: |
+          git clone --depth=1 --branch "${{ steps.ref.outputs.ref }}" "$WINE_REPO" wine
+          git -C wine log -1 --format='%h %s'
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ steps.ref.outputs.ref }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ steps.ref.outputs.ref }}-
+            ccache-
+
+      - name: Configure
+        run: |
+          mkdir build
+          cd build
+          PATH="/usr/lib/ccache:$PATH" ../wine/configure --prefix="$PREFIX" \
+            --enable-archs=x86_64,i386 --disable-tests \
+            CFLAGS=-O2 CROSSCFLAGS=-O2
+          grep -q 'checking for DBUS.*yes' config.log || { echo 'D-Bus not found, Bluetooth would be missing' >&2; exit 1; }
+
+      - name: Build
+        run: |
+          PATH="/usr/lib/ccache:$PATH" make -C build -j"$(nproc)"
+          ccache -s
+
+      - name: Stage and check
+        run: |
+          make -C build install-lib DESTDIR="$PWD/stage"
+          root="stage$PREFIX"
+          "$root/bin/wine" --version
+          for f in x86_64-windows/winebth.sys x86_64-windows/ntdll.dll i386-windows/ntdll.dll x86_64-unix/ntdll.so; do
+            test -f "$root/lib/wine/$f" || { echo "missing $f" >&2; exit 1; }
+          done
+          {
+            echo "wine-ref: ${{ steps.ref.outputs.ref }}"
+            echo "wine-commit: $(git -C wine rev-parse HEAD)"
+            echo "rouvy-linux: ${{ steps.ref.outputs.tag || github.sha }}"
+            echo "built: $(date -u +%Y-%m-%dT%H:%M:%SZ) on ubuntu:22.04, glibc $(ldd --version | head -1 | grep -o '[0-9.]*$')"
+          } > "$root/VERSION"
+          cat "$root/VERSION"
+
+      - name: Pack
+        id: pack
+        run: |
+          name="wine-rouvy-${{ steps.ref.outputs.tag || steps.ref.outputs.ref }}-x86_64.tar.xz"
+          tar -C stage/opt -cJf "$name" wine-rouvy
+          sha256sum "$name" > "$name.sha256"
+          ls -l "$name"
+          echo "tarball=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pack.outputs.tarball }}
+          path: |
+            ${{ steps.pack.outputs.tarball }}
+            ${{ steps.pack.outputs.tarball }}.sha256
+          compression-level: 0
+
+      - name: Publish on the release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ steps.pack.outputs.tarball }}
+            ${{ steps.pack.outputs.tarball }}.sha256
+          body: |
+            Wine fork `${{ steps.ref.outputs.ref }}` built on Ubuntu 22.04, WoW64, without tests.
+            Unpack anywhere, `wine-rouvy/bin/wine` finds its own libraries.

@@ -1,0 +1,57 @@
+# Lutris installer for Rouvy on the patched Wine tarball.
+#
+# Everything lands in the game directory: the Wine tarball unpacked as
+# wine-rouvy/ and the prefix beside it. No system Wine is used and no
+# Lutris runner is installed. Rouvy's installer opens the app when it
+# finishes, close it and let Lutris complete.
+#
+# Flatpak Lutris cannot reach BlueZ until the system bus is opened:
+#   flatpak override --user --system-talk-name=org.bluez net.lutris.Lutris
+#
+# Paste this file into Lutris: + > Install from a local install script.
+name: Rouvy
+game_slug: rouvy
+version: Patched Wine with Bluetooth LE
+slug: rouvy-wine-rouvy
+runner: wine
+
+script:
+  files:
+    - setup: N/A:Select the RouvySetup.exe downloaded from your Rouvy account
+    - wine-rouvy: https://github.com/evanjt/rouvy-linux/releases/download/v0.1.0/wine-rouvy-v0.1.0-x86_64.tar.xz
+
+  game:
+    exe: drive_c/Program Files/VirtualTraining/Rouvy/Rouvy.exe
+    prefix: $GAMEDIR
+    arch: win64
+
+  installer:
+    - extract:
+        file: wine-rouvy
+        dst: $GAMEDIR
+    - task:
+        name: create_prefix
+        prefix: $GAMEDIR
+        arch: win64
+        install_gecko: true
+        install_mono: true
+    # The Bluetooth plugin only enables its WinRT path on Windows 10.
+    - task:
+        name: winetricks
+        prefix: $GAMEDIR
+        app: win10
+    - task:
+        name: wineexec
+        prefix: $GAMEDIR
+        executable: setup
+
+  wine:
+    version: custom
+    custom_wine_path: $GAMEDIR/wine-rouvy/bin/wine
+    # The verified rides ran plain Wine, no translation layers.
+    dxvk: false
+    vkd3d: false
+
+  system:
+    env:
+      WINEDEBUG: -all

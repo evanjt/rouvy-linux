@@ -1,0 +1,14 @@
+# The guards only. The Wine tests need a built Wine and an installed Rouvy.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run
+        run: tests/run.sh

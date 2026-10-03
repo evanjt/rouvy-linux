@@ -1,0 +1,146 @@
+# Maintainer: Evan Thomas <evan@evanjt.com>
+#
+# Builds the patched Wine into /opt/wine-rouvy and ships the rouvy
+# launcher. Nothing lands in /usr/bin except rouvy, and the package
+# neither provides nor conflicts with wine, so a system Wine stays as it
+# is. The prefix and logs live in the user's ~/.local/share/rouvy-linux,
+# the same layout as scripts/install.sh.
+#
+#   /opt/wine-rouvy/                            the patched Wine, bin/wine lives here
+#   /usr/bin/rouvy                              launcher, runs scripts/rouvy.sh with ROUVY_WINE=/opt/wine-rouvy
+#   /usr/share/rouvy-linux/                     the launcher scripts
+#   /usr/share/applications/rouvy-linux.desktop menu entry
+#
+# Release: pkgver is the Wine fork tag with the hyphens dropped,
+# wine-11.18-rouvy-0.1.0 is 11.18.rouvy0.1.0, and _launcher pins the rouvy-linux
+# tag the scripts come from. Both tags must exist on GitHub before makepkg
+# can fetch them. Bump pkgver or _launcher, reset pkgrel to 1, then
+#   makepkg --printsrcinfo > .SRCINFO
+# and publish by copying PKGBUILD, .SRCINFO and rouvy-linux.desktop into a
+# clone of ssh://aur@aur.archlinux.org/wine-rouvy.git and pushing.
+
+pkgname=wine-rouvy
+pkgver=11.18.rouvy0.1.0
+pkgrel=1
+pkgdesc="Wine with Bluetooth LE sensor patches for Rouvy, self-contained under /opt"
+arch=(x86_64)
+url="https://github.com/evanjt/rouvy-linux"
+license=(LGPL-2.1-or-later MIT)
+options=(!lto !staticlibs pestrip)
+
+# The fork tag is wine-<base>-rouvy-<release>. makepkg forbids hyphens in pkgver.
+_winetag="wine-${pkgver/.rouvy/-rouvy-}"
+_launcher=v0.1.0
+
+depends=(
+  attr
+  bluez
+  dbus
+  desktop-file-utils
+  fontconfig
+  freetype2
+  gettext
+  glibc
+  gnutls
+  gst-plugins-base-libs
+  libgcc
+  libpcap
+  libpulse
+  libunwind
+  libxcursor
+  libxi
+  libxkbcommon
+  libxrandr
+  python
+  vulkan-icd-loader
+  wayland
+)
+makedepends=(
+  alsa-lib
+  ffmpeg
+  git
+  gtk3
+  libcups
+  libgphoto2
+  libva
+  libxcomposite
+  libxinerama
+  libxxf86vm
+  mesa
+  mingw-w64-gcc
+  opencl-headers
+  opencl-icd-loader
+  pcsclite
+  perl
+  samba
+  sane
+  sdl2
+  unixodbc
+  v4l-utils
+  vulkan-headers
+)
+optdepends=(
+  'alsa-lib: ALSA audio'
+  'alsa-plugins: ALSA audio'
+  'ffmpeg: route video codecs'
+  'gst-plugins-bad: route video'
+  'gst-plugins-good: route video'
+  'gst-plugins-ugly: route video'
+  'gtk3: file dialogs'
+  'libva: video acceleration'
+  'libxcomposite: compositing'
+  'libgphoto2: cameras'
+  'libxinerama: multiple monitors'
+  'opencl-icd-loader: OpenCL'
+  'pcsclite: smart cards'
+  'perl: winemaker'
+  'python-gobject: hold off the screen saver during a ride'
+  'sane: scanners'
+  'sdl2: game controllers'
+  'v4l-utils: webcams'
+)
+
+source=("wine::git+https://github.com/evanjt/wine.git#tag=$_winetag"
+        "rouvy-linux::git+https://github.com/evanjt/rouvy-linux.git#tag=$_launcher")
+sha512sums=('SKIP'
+            'SKIP')
+
+build() {
+  export CROSSCFLAGS="-O2 -pipe -g"
+  export CROSSCXXFLAGS="-O2 -pipe -g"
+  export CROSSLDFLAGS="-Wl,-O1"
+  if [[ $CFLAGS =~ (-ffile-prefix-map=[^[:space:]]+) ]]; then
+    CROSSCFLAGS="$CROSSCFLAGS ${BASH_REMATCH[1]}"
+    CROSSCXXFLAGS="$CROSSCXXFLAGS ${BASH_REMATCH[1]}"
+  fi
+
+  mkdir -p build
+  cd build
+  ../wine/configure \
+    --prefix=/opt/$pkgname \
+    --disable-tests \
+    --enable-archs=x86_64,i386 \
+    --enable-build-id
+  make
+}
+
+package() {
+  make -C build DESTDIR="$pkgdir" install
+
+  # The launcher and its helpers.
+  local share="$pkgdir/usr/share/rouvy-linux"
+  install -Dm755 -t "$share/scripts" \
+    rouvy-linux/scripts/rouvy.sh \
+    rouvy-linux/scripts/rouvy-version.sh \
+    rouvy-linux/scripts/inhibit-idle.py \
+    rouvy-linux/scripts/capture-bluez.sh \
+    rouvy-linux/scripts/diagnose.sh
+  install -Dm644 "rouvy-linux/packaging/rouvy-linux.desktop" \
+    "$pkgdir/usr/share/applications/rouvy-linux.desktop"
+  install -Dm644 rouvy-linux/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+
+  install -Dm755 /dev/stdin "$pkgdir/usr/bin/rouvy" <<'LAUNCHER'
+#!/usr/bin/env bash
+ROUVY_WINE=/opt/wine-rouvy ROUVY_LAUNCHER=/usr/bin/rouvy exec /usr/share/rouvy-linux/scripts/rouvy.sh "$@"
+LAUNCHER
+}
