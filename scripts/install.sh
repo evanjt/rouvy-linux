@@ -77,12 +77,51 @@ warn() { printf '      \033[33m%s\033[0m\n' "$*" >&2; }
 fail() { printf '      \033[31m%s\033[0m\n' "$*" >&2; exit 1; }
 clock() { printf '%d:%02d' $(($1 / 60)) $(($1 % 60)); }
 
+# Every file this install left outside ROUVY_HOME: ours, Wine's for our prefix, and Rouvy's shortcut,
+# icon and menu files once nothing else uses them. Other Wine prefixes keep theirs.
+owned_files() {
+    local apps="$HOME/.local/share/applications" icons="$HOME/.local/share/icons/hicolor"
+    local desktop_dir f others=0 icon_used=0
+    desktop_dir=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")
+    [[ -e $LAUNCHER ]] && echo "$LAUNCHER"
+    for f in "$apps"/*.desktop "$apps"/wine/Programs/Rouvy/*.desktop "$desktop_dir"/*.desktop; do
+        [[ -f $f ]] || continue
+        if grep -qsF -e "$PREFIX\"" -e "$LAUNCHER" "$f"; then
+            echo "$f"
+        else
+            [[ $f == "$apps"/wine/Programs/Rouvy/* ]] && others=1
+            grep -qsx 'Icon=769D_Rouvy.0' "$f" && icon_used=1
+        fi
+    done
+    if [[ $others -eq 0 ]]; then
+        for f in "$apps/wine/Programs/Rouvy" "$HOME/.local/share/desktop-directories/wine-Programs-Rouvy.directory" \
+                 "$HOME/.config/menus/applications-merged/wine-Programs-Rouvy-Rouvy.menu"; do
+            [[ -e $f ]] && echo "$f"
+        done
+    fi
+    for f in "$icons"/*/apps/rouvy.png; do
+        [[ -e $f ]] && echo "$f"
+    done
+    if [[ $icon_used -eq 0 ]]; then
+        for f in "$icons"/*/apps/769D_Rouvy.0.png; do
+            [[ -e $f ]] && echo "$f"
+        done
+    fi
+    return 0
+}
+
 if [[ $UNINSTALL -eq 1 ]]; then
-    echo "This removes $(tilde "$ROUVY_HOME"), $(tilde "$LAUNCHER") and $(tilde "$DESKTOP")"
+    mapfile -t files < <(owned_files)
+    echo "This removes $(tilde "$ROUVY_HOME") and these files:"
+    for f in "${files[@]}"; do
+        echo "  $(tilde "$f")"
+    done
     read -r -p "Continue? [y/N] " ok
     [[ $ok == y || $ok == Y ]] || exit 1
     [[ -x "$WINE_DIR/bin/wineserver" ]] && WINEPREFIX="$PREFIX" "$WINE_DIR/bin/wineserver" -k || true
-    rm -rf "$ROUVY_HOME" "$LAUNCHER" "$DESKTOP"
+    rm -rf "$ROUVY_HOME" "${files[@]}"
+    update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+    gtk-update-icon-cache -q "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
     echo "Removed"
     exit 0
 fi
@@ -272,7 +311,9 @@ install_launcher() {
 ROUVY_HOME="$ROUVY_HOME" ROUVY_LAUNCHER="$LAUNCHER" exec "$ROOT/scripts/rouvy.sh" "\$@"
 EOF
     chmod +x "$LAUNCHER"
-    sed "s|^Exec=.*|Exec=$LAUNCHER|" "$ROOT/packaging/rouvy-linux.desktop" >"$DESKTOP"
+    sed "s|^Exec=rouvy|Exec=$LAUNCHER|" "$ROOT/packaging/rouvy-linux.desktop" >"$DESKTOP"
+    # The menu entry also takes the com.rouvy:// login link from the browser.
+    update-desktop-database "$(dirname "$DESKTOP")" 2>/dev/null || true
     note "launcher $(tilde "$LAUNCHER"), menu entry $(tilde "$DESKTOP")"
 }
 

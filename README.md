@@ -33,7 +33,9 @@ installer adds work too. All of them run the patched Wine.
 
 If the download link stops working, get the installer from your Rouvy
 account with your browser's user agent set to Windows.
-`./install.sh --uninstall` removes everything again.
+`./install.sh --uninstall` lists everything the install added, shortcuts,
+menu entries, link handlers and icons included, and removes it. Other Wine
+prefixes keep theirs.
 
 ### Build Wine from source
 

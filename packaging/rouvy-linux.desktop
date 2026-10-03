@@ -2,7 +2,8 @@
 Type=Application
 Name=Rouvy
 Comment=Rouvy on patched Wine with Bluetooth LE sensors
-Exec=rouvy
+Exec=rouvy %u
 Icon=rouvy
 Terminal=false
 Categories=Game;Sports;
+MimeType=x-scheme-handler/com.rouvy;

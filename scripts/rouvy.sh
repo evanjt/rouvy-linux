@@ -7,7 +7,7 @@
 #   rouvy.sh                                  start Rouvy
 #   rouvy.sh --capture                        start Rouvy and record BlueZ and HCI for the ride
 #   rouvy.sh --installer ~/Downloads/RouvySetup.exe   create the prefix and install Rouvy
-#   rouvy.sh --open com.rouvy://...           hand a browser login link to the running Rouvy
+#   rouvy.sh com.rouvy://...                  hand a browser login link to the running Rouvy
 #
 #   ROUVY_HOME          prefix, logs and captures, default ~/.local/share/rouvy-linux
 #   ROUVY_WINE          the patched Wine, default $ROUVY_HOME/wine
@@ -32,10 +32,10 @@ OPEN=""
 
 usage() { sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 
-# winemenubuilder writes menu, desktop and com.rouvy:// handler entries for
-# the prefix that run whatever wine is on PATH, usually a system Wine without
-# the Bluetooth driver. rouvy-linux.desktop is the menu entry, so Wine's goes,
-# and the others are pointed at this launcher. Rouvy rewrites its shortcuts
+# winemenubuilder writes menu and desktop entries for the prefix that run
+# whatever wine is on PATH, usually a system Wine without the Bluetooth
+# driver. rouvy-linux.desktop is the menu entry, so Wine's goes, and the
+# desktop shortcut is pointed at this launcher. Rouvy rewrites its shortcuts
 # on update, so this runs before every launch as well.
 rewrite_wine_entries() {
     local apps="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
@@ -51,13 +51,11 @@ rewrite_wine_entries() {
         [[ -f $f ]] && grep -qF "WINEPREFIX=$WINEPREFIX\"" "$f" && rm "$f"
     done
     rmdir "$apps/wine/Programs/Rouvy" 2>/dev/null
-    for f in "$desktop/Rouvy.desktop" "$apps/wine-protocol-com.rouvy.desktop"; do
-        [[ -f $f ]] || continue
-        grep -qF "WINEPREFIX=$WINEPREFIX\"" "$f" || continue
-        sed -i -e "s|^Exec=env \"WINEPREFIX=[^\"]*\" wine start %u$|Exec=$launcher --open %u|" \
-               -e "s|^Exec=env \"WINEPREFIX=[^\"]*\" wine .*|Exec=$launcher|" \
+    f="$desktop/Rouvy.desktop"
+    if [[ -f $f ]] && grep -qF "WINEPREFIX=$WINEPREFIX\"" "$f"; then
+        sed -i -e "s|^Exec=env \"WINEPREFIX=[^\"]*\" wine .*|Exec=$launcher|" \
                -e "s|^Name=Rouvy$|Name=Rouvy (Linux)|" "$f"
-    done
+    fi
 }
 
 # rouvy-linux.desktop is installed system wide by the package, so it names
@@ -74,6 +72,7 @@ while [[ $# -gt 0 ]]; do
         --capture) CAPTURE=1; shift ;;
         --installer) INSTALLER=$(readlink -f "$2"); shift 2 ;;
         --open) OPEN=$2; shift 2 ;;
+        com.rouvy:*) OPEN=$1; shift ;;
         -h|--help) usage ;;
         *) echo "unknown option: $1" >&2; usage 1 ;;
     esac
@@ -117,16 +116,16 @@ if [[ -n $INSTALLER ]]; then
     mkdir -p "$WINEPREFIX" "$ROUVY_HOME/logs"
     INSTALL_LOG="$ROUVY_HOME/logs/installer.log"
     echo "Prefix: $WINEPREFIX"
-    wineboot -u >"$INSTALL_LOG" 2>&1
+    # File types and link handlers made from this prefix would replace those of
+    # other prefixes, so the prefix makes none. The menu entry takes com.rouvy://.
+    WINEDLLOVERRIDES=winemenubuilder.exe=d wineboot -u >"$INSTALL_LOG" 2>&1
+    wine reg add 'HKCU\Software\Wine\FileOpenAssociations' /v Enable /d N /f >>"$INSTALL_LOG" 2>&1
     # The Rouvy BLE plugin only enables its WinRT path on Windows 10.
     winecfg -v win10 >>"$INSTALL_LOG" 2>&1
     wineserver -w
     echo "Running the Rouvy installer. When it finishes and starts Rouvy, close Rouvy."
     echo "Wine output: $INSTALL_LOG"
     wine "$INSTALLER" >>"$INSTALL_LOG" 2>&1
-    wineserver -w
-    # Rouvy registers com.rouvy:// after wineboot made the link handlers, so the first login needs them made again.
-    wine winemenubuilder -a >>"$INSTALL_LOG" 2>&1
     wineserver -w
     rewrite_wine_entries
     copy_rouvy_icon
