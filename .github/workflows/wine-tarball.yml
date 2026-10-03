@@ -12,11 +12,11 @@ on:
     inputs:
       wine_ref:
         description: Tag or branch of the Wine fork to build
-        default: wine-11.18-rouvy-0.1.0
+        default: wine-11.18-rouvy-0.1.1
 
 env:
   WINE_REPO: https://github.com/evanjt/wine.git
-  WINE_TAG: wine-11.18-rouvy-0.1.0
+  WINE_TAG: wine-11.18-rouvy-0.1.1
   PREFIX: /opt/wine-rouvy
   CCACHE_DIR: ${{ github.workspace }}/.ccache
 

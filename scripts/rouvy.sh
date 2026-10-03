@@ -158,6 +158,12 @@ fi
 
 cd "$APP" || exit 1
 [[ $CAPTURE == 1 ]] || exec "${INHIBIT[@]}" wine Rouvy.exe >"$LOG" 2>&1
+# Ask for the btmon password before Rouvy's window covers the terminal.
+timeout 1 btmon -w /dev/null >/dev/null 2>&1
+if [[ $? -ne 124 ]] && ! sudo -n -v 2>/dev/null; then
+    echo "btmon needs root for the HCI trace, asking sudo once"
+    sudo -v 2>/dev/null || true
+fi
 "${INHIBIT[@]}" wine Rouvy.exe >"$LOG" 2>&1 &
 ROUVY_PID=$!
 echo "Capturing BlueZ into $CAPTURE_DIR until Rouvy quits"

@@ -41,7 +41,7 @@ hci_trace() {
     local runner=()
     timeout 1 btmon -w /dev/null > /dev/null 2>&1
     if [[ $? -ne 124 ]]; then
-        echo "btmon needs root for the HCI trace, asking sudo once"
+        sudo -n -v 2>/dev/null || echo "btmon needs root for the HCI trace, asking sudo once"
         sudo -v 2>/dev/null || { warn "btmon cannot open the HCI monitor and sudo was refused, no HCI trace"; return; }
         runner=(sudo)
     fi

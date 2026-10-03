@@ -15,23 +15,24 @@
 # Usage:
 #   scripts/install.sh                                            prebuilt Wine, or a build when there is none
 #   scripts/install.sh --build                                    build Wine from source
-#   scripts/install.sh --installer Rouvy_Installer.exe            this installer, not the newest one found
+#   scripts/install.sh --installer Rouvy_Installer.exe            this installer, not one found or downloaded
 #   scripts/install.sh --uninstall
 set -Eeuo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
 ROUVY_HOME="${ROUVY_HOME:-$HOME/.local/share/rouvy-linux}"
-RELEASE="${ROUVY_RELEASE:-v0.1.1}"
+RELEASE="${ROUVY_RELEASE:-v0.1.2}"
 RELEASE_URL="https://github.com/evanjt/rouvy-linux/releases/download/$RELEASE"
 MIN_GLIBC=2.35
 WINE_REPO="${WINE_REPO:-https://github.com/evanjt/wine.git}"
-WINE_REF="${WINE_REF:-wine-11.18-rouvy-0.1.0}"
+WINE_REF="${WINE_REF:-wine-11.18-rouvy-0.1.1}"
 JOBS="${JOBS:-$(nproc)}"
 # The Wine Mono the fork expects, from dlls/appwiz.cpl/addons.c.
 MONO_VERSION=11.3.0
 MONO_SHA=df2dfc1665c2511882e7cabd56eafd0c0a3d94e5a7e86f969277f6c189d418d3
 INSTALLER=""
 INSTALLER_VERSION=""
+INSTALLER_URL="${ROUVY_INSTALLER_URL:-https://cdn.rouvy.com/update/Rouvy_Installer.exe}"
 TARBALL=""
 MODE=tarball
 UNINSTALL=0
@@ -72,7 +73,8 @@ case $MODE in
     existing) STEPS=2 ;;
 esac
 DRAWER=""
-trap 'if [[ -n $DRAWER ]]; then kill "$DRAWER" 2>/dev/null; printf "\n"; fi' EXIT
+FETCHER=""
+trap 'trap - ERR; if [[ -n $DRAWER$FETCHER ]]; then kill $DRAWER $FETCHER 2>/dev/null; printf "\n"; fi' EXIT
 trap 'fail "Unexpected error at line $LINENO: $BASH_COMMAND"' ERR
 trap 'printf "\n"; warn "Stopped"; exit 130' INT TERM
 
@@ -83,16 +85,23 @@ warn() { printf '      \033[33m%s\033[0m\n' "$*" >&2; }
 fail() { printf '      \033[31m%s\033[0m\n' "$*" >&2; exit 1; }
 clock() { printf '%d:%02d' $(($1 / 60)) $(($1 % 60)); }
 
-# The newest Rouvy installer in this directory, beside this script or in Downloads, as "version path".
-# Windows version info sits near the start of the file in UTF-16, so dropping the NULs makes it greppable.
+# The Rouvy version inside an installer, nothing for any other file. Windows version info
+# sits near the start of the file in UTF-16, so dropping the NULs makes it greppable.
+installer_version() {
+    local info
+    info=$(head -c 4M "$1" | tr -d '\0' | grep -aoE 'ProductNameRouvy|ProductVersion[0-9.]+' || true)
+    [[ $info == *ProductNameRouvy* ]] && sed -n 's/^ProductVersion//p' <<<"$info" | head -n1
+    return 0
+}
+
+# The newest Rouvy installer in this directory, beside this script, in Downloads or downloaded
+# by an earlier run, as "version path".
 find_installer() {
-    local dir f info ver best="" best_ver=""
-    for dir in "$PWD" "$ROOT/scripts" "$(xdg-user-dir DOWNLOAD 2>/dev/null || echo "$HOME/Downloads")"; do
+    local dir f ver best="" best_ver=""
+    for dir in "$PWD" "$ROOT/scripts" "$(xdg-user-dir DOWNLOAD 2>/dev/null || echo "$HOME/Downloads")" "$DOWNLOADS"; do
         for f in "$dir"/*.exe; do
             [[ -f $f ]] || continue
-            info=$(head -c 4M "$f" | tr -d '\0' | grep -aoE 'ProductNameRouvy|ProductVersion[0-9.]+' || true)
-            [[ $info == *ProductNameRouvy* ]] || continue
-            ver=$(sed -n 's/^ProductVersion//p' <<<"$info" | head -n1)
+            ver=$(installer_version "$f")
             [[ -n $ver ]] || continue
             if [[ -z $best || $(printf '%s\n%s\n' "$best_ver" "$ver" | sort -V | tail -n1) != "$best_ver" ]]; then
                 best=$f best_ver=$ver
@@ -152,18 +161,23 @@ if [[ $UNINSTALL -eq 1 ]]; then
     exit 0
 fi
 
-# Elapsed time while a step runs, and a bar when the step's LOG is expected to reach TOTAL lines.
+# Elapsed time while a step runs, and a bar when FILE is expected to reach TOTAL lines, or bytes.
 draw() {
     trap - ERR INT TERM EXIT
     set +eo pipefail
-    local total=$1 log=$2 start=$SECONDS n pct bar
+    local total=$1 log=$2 unit=${3:-lines} start=$SECONDS n pct bar size=""
     while :; do
         if [[ $total -gt 0 ]]; then
-            n=$(wc -l <"$log" 2>/dev/null)
+            if [[ $unit == bytes ]]; then
+                n=$(stat -c %s "$log" 2>/dev/null)
+                size="$((${n:-0} / 1048576)) of $((total / 1048576)) MB"
+            else
+                n=$(wc -l <"$log" 2>/dev/null)
+            fi
             pct=$((${n:-0} * 100 / total))
             [[ $pct -gt 99 ]] && pct=99
             printf -v bar '%*s' $((pct * 30 / 100)) ''
-            printf '\r      [%-30s] %3d%%  %s ' "${bar// /#}" "$pct" "$(clock $((SECONDS - start)))"
+            printf '\r      [%-30s] %3d%%  %s  %s' "${bar// /#}" "$pct" "$(clock $((SECONDS - start)))" "$size"
         else
             printf '\r      %s ' "$(clock $((SECONDS - start)))"
         fi
@@ -257,12 +271,30 @@ check_build_tools() {
     check_bluetooth
 }
 
+# Download URL to FILE with the same bar as the build, sized from the server's Content-Length.
 fetch() {
+    local url=$1 out=$2 total rc=0
     if command -v curl >/dev/null; then
-        curl -fL --progress-bar -o "$2" "$1"
+        total=$(curl -sIL "$url" 2>/dev/null | grep -i '^content-length:' | tail -n1 | tr -dc '0-9')
+        curl -fsSL -o "$out" "$url" &
     else
-        wget -q --show-progress -O "$2" "$1"
+        total=$(wget -q --spider -S "$url" 2>&1 | grep -i 'content-length:' | tail -n1 | tr -dc '0-9')
+        wget -q -O "$out" "$url" &
     fi
+    FETCHER=$!
+    if [[ -t 1 && ${total:-0} -gt 1048576 ]]; then
+        draw "$total" "$out" bytes &
+        DRAWER=$!
+    fi
+    wait "$FETCHER" || rc=$?
+    FETCHER=""
+    if [[ -n $DRAWER ]]; then
+        kill "$DRAWER" 2>/dev/null || true
+        wait "$DRAWER" 2>/dev/null || true
+        DRAWER=""
+        printf '\r\033[K'
+    fi
+    return $rc
 }
 
 download_wine() {
@@ -379,20 +411,41 @@ add_mono() {
     fi
 }
 
+download_installer() {
+    local file="$DOWNLOADS/Rouvy_Installer.exe" ver
+    mkdir -p "$DOWNLOADS"
+    note "$INSTALLER_URL"
+    if fetch "$INSTALLER_URL" "$file.part"; then
+        ver=$(installer_version "$file.part")
+        if [[ -n $ver ]]; then
+            mv "$file.part" "$file"
+            INSTALLER=$file INSTALLER_VERSION=$ver
+            note "Rouvy $ver"
+            return
+        fi
+        warn "The download is not a Rouvy installer."
+    fi
+    rm -f "$file.part"
+    warn "Get the installer from your Rouvy account with the browser's user agent set to Windows."
+    warn "Wine is still installed, then run: rouvy --installer /path/to/Rouvy_Installer.exe"
+}
+
 install_rouvy() {
     step "Install Rouvy"
     install_launcher
     add_mono
-    if [[ -z "$INSTALLER" ]]; then
-        note "No Rouvy installer found here or in Downloads. Download it and run this again, or later:"
-        note "  rouvy --installer /path/to/Rouvy_Installer.exe"
-        return
-    fi
+    [[ -n $INSTALLER ]] || return 0
     ROUVY_HOME="$ROUVY_HOME" ROUVY_LAUNCHER="$LAUNCHER" "$ROOT/scripts/rouvy.sh" --installer "$INSTALLER" | sed 's/^/      /'
 }
 
 if [[ -z $INSTALLER ]]; then
     read -r INSTALLER_VERSION INSTALLER < <(find_installer) || true
+fi
+# A missing installer is fetched first, before any Wine download or build.
+DOWNLOAD_INSTALLER=0
+if [[ -z $INSTALLER ]]; then
+    DOWNLOAD_INSTALLER=1
+    STEPS=$((STEPS + 1))
 fi
 
 mkdir -p "$LOGS"
@@ -409,7 +462,11 @@ note "Wine         $(tilde "$WINE_DIR")"
 note "prefix       $(tilde "$PREFIX")"
 note "logs         $(tilde "$LOGS")"
 note "launcher     $(tilde "$LAUNCHER")"
-note "installer    $(tilde "${INSTALLER:-none found, Rouvy is not installed this run}")${INSTALLER_VERSION:+, Rouvy $INSTALLER_VERSION}"
+note "installer    $(tilde "${INSTALLER:-$INSTALLER_URL}")${INSTALLER_VERSION:+, Rouvy $INSTALLER_VERSION}"
+if [[ $DOWNLOAD_INSTALLER -eq 1 ]]; then
+    step "Download the Rouvy installer"
+    download_installer
+fi
 if [[ $MODE == tarball ]]; then
     check_system
     if [[ -z $NO_PREBUILT ]]; then download_wine; fi

@@ -12,7 +12,7 @@
 #   /usr/share/applications/rouvy-linux.desktop menu entry
 #
 # Release: pkgver is the Wine fork tag with the hyphens dropped,
-# wine-11.18-rouvy-0.1.0 is 11.18.rouvy0.1.0, and _launcher pins the rouvy-linux
+# wine-11.18-rouvy-0.1.1 is 11.18.rouvy0.1.1, and _launcher pins the rouvy-linux
 # tag the scripts come from. Both tags must exist on GitHub before makepkg
 # can fetch them. Bump pkgver or _launcher, reset pkgrel to 1, then
 #   makepkg --printsrcinfo > .SRCINFO
@@ -20,7 +20,7 @@
 # clone of ssh://aur@aur.archlinux.org/wine-rouvy.git and pushing.
 
 pkgname=wine-rouvy
-pkgver=11.18.rouvy0.1.0
+pkgver=11.18.rouvy0.1.1
 pkgrel=1
 pkgdesc="Wine with Bluetooth LE sensor patches for Rouvy, self-contained under /opt"
 arch=(x86_64)
@@ -30,7 +30,7 @@ options=(!lto !staticlibs pestrip)
 
 # The fork tag is wine-<base>-rouvy-<release>. makepkg forbids hyphens in pkgver.
 _winetag="wine-${pkgver/.rouvy/-rouvy-}"
-_launcher=v0.1.1
+_launcher=v0.1.2
 
 depends=(
   attr

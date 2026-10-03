@@ -14,16 +14,15 @@ A proof of concept. Not affiliated with Rouvy or the Wine project.
 ```bash
 git clone https://github.com/evanjt/rouvy-linux.git
 cd rouvy-linux/scripts
-wget https://cdn.rouvy.com/update/Rouvy_Installer.exe
 ./install.sh
 ```
 
-`install.sh` finds the newest Rouvy installer in its directory or in
-Downloads, by the version inside it. `--installer FILE` picks one. It
-downloads a prebuilt patched Wine (x86_64, glibc 2.35 or newer) and
-checks it runs. Without one it builds Wine from source, see below. Then
-it runs the Rouvy installer silently. Everything goes under
-`~/.local/share/rouvy-linux`.
+`install.sh` downloads a prebuilt patched Wine (x86_64, glibc 2.35 or
+newer) and checks it runs. Without one it builds Wine from source, see
+below. Then it runs the Rouvy installer silently. It uses the newest one
+in its directory or in Downloads, by the version inside it, and downloads
+one from Rouvy when there is none. `--installer FILE` picks one.
+Everything goes under `~/.local/share/rouvy-linux`.
 
 Start Rouvy and log in:
 
@@ -34,8 +33,9 @@ rouvy
 The Rouvy entry in your application menu works too. Both run the patched
 Wine.
 
-If the download link stops working, get the installer from your Rouvy
-account with your browser's user agent set to Windows.
+If the installer download stops working, get it from your Rouvy account
+with your browser's user agent set to Windows and pass it with
+`--installer`.
 `./install.sh --uninstall` lists everything the install added, shortcuts,
 menu entries, link handlers and icons included, and removes it. Other Wine
 prefixes keep theirs.
@@ -81,7 +81,7 @@ Needs BlueZ 5.48 or newer.
 
 | Rouvy | rouvy-linux | Wine fork | BlueZ | Kernel |
 |---|---|---|---|---|
-| 4.7.2.541 | v0.1.1 | wine-11.18-rouvy-0.1.0 | 5.87 | 7.2 |
+| 4.7.2.541 | v0.1.2 | wine-11.18-rouvy-0.1.1 | 5.87 | 7.2 |
 
 Rouvy updates itself, so the launcher warns when the installed version
 is not the one above.
@@ -93,7 +93,10 @@ is not the one above.
 - Don't scan from anything else on the same adapter. It cuts the
   advertisements Rouvy sees about sevenfold.
 - Wake each sensor before selecting it. Pedals sleep after a few idle
-  minutes.
+  minutes, and a watch stops broadcasting heart rate once its previous
+  link ends, so start the broadcast again before each ride.
+- The first connect after a reboot takes a second or two. Later ones take
+  three to six, at the interval the sensor itself asks for.
 
 Sensors tested on an Intel AX200:
 
@@ -155,11 +158,11 @@ Attach that and the Wine log to an issue, with your Rouvy version.
 
 ## Development
 
-The Wine changes live on the fork at tag `wine-11.18-rouvy-0.1.0`. Build
+The Wine changes live on the fork at tag `wine-11.18-rouvy-0.1.1`. Build
 it beside this repository and never `make install` it:
 
 ```bash
-git clone --branch wine-11.18-rouvy-0.1.0 https://github.com/evanjt/wine.git ../wine
+git clone --branch wine-11.18-rouvy-0.1.1 https://github.com/evanjt/wine.git ../wine
 mkdir ../wine-build2 && cd ../wine-build2
 ../wine/configure --enable-archs=x86_64,i386 --disable-tests
 make -j"$(nproc)"

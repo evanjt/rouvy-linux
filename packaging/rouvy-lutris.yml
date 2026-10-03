@@ -18,7 +18,7 @@ runner: wine
 script:
   files:
     - setup: N/A:Select the RouvySetup.exe downloaded from your Rouvy account
-    - wine-rouvy: https://github.com/evanjt/rouvy-linux/releases/download/v0.1.1/wine-rouvy-v0.1.1-x86_64.tar.xz
+    - wine-rouvy: https://github.com/evanjt/rouvy-linux/releases/download/v0.1.2/wine-rouvy-v0.1.2-x86_64.tar.xz
 
   game:
     exe: drive_c/Program Files/VirtualTraining/Rouvy/Rouvy.exe
