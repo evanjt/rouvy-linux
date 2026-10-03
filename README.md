@@ -81,7 +81,7 @@ Needs BlueZ 5.48 or newer.
 
 | Rouvy | rouvy-linux | Wine fork | BlueZ | Kernel |
 |---|---|---|---|---|
-| 4.7.2.541 | v0.1.2 | wine-11.18-rouvy-0.1.1 | 5.87 | 7.2 |
+| 4.7.2.541 | v0.1.3 | wine-11.18-rouvy-0.1.2 | 5.87 | 7.2 |
 
 Rouvy updates itself, so the launcher warns when the installed version
 is not the one above.
@@ -158,11 +158,11 @@ Attach that and the Wine log to an issue, with your Rouvy version.
 
 ## Development
 
-The Wine changes live on the fork at tag `wine-11.18-rouvy-0.1.1`. Build
+The Wine changes live on the fork at tag `wine-11.18-rouvy-0.1.2`. Build
 it beside this repository and never `make install` it:
 
 ```bash
-git clone --branch wine-11.18-rouvy-0.1.1 https://github.com/evanjt/wine.git ../wine
+git clone --branch wine-11.18-rouvy-0.1.2 https://github.com/evanjt/wine.git ../wine
 mkdir ../wine-build2 && cd ../wine-build2
 ../wine/configure --enable-archs=x86_64,i386 --disable-tests
 make -j"$(nproc)"

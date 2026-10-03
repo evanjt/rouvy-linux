@@ -21,11 +21,11 @@ set -Eeuo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
 ROUVY_HOME="${ROUVY_HOME:-$HOME/.local/share/rouvy-linux}"
-RELEASE="${ROUVY_RELEASE:-v0.1.2}"
+RELEASE="${ROUVY_RELEASE:-v0.1.3}"
 RELEASE_URL="https://github.com/evanjt/rouvy-linux/releases/download/$RELEASE"
 MIN_GLIBC=2.35
 WINE_REPO="${WINE_REPO:-https://github.com/evanjt/wine.git}"
-WINE_REF="${WINE_REF:-wine-11.18-rouvy-0.1.1}"
+WINE_REF="${WINE_REF:-wine-11.18-rouvy-0.1.2}"
 JOBS="${JOBS:-$(nproc)}"
 # The Wine Mono the fork expects, from dlls/appwiz.cpl/addons.c.
 MONO_VERSION=11.3.0

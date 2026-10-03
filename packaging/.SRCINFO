@@ -1,6 +1,6 @@
 pkgbase = wine-rouvy
 	pkgdesc = Wine with Bluetooth LE sensor patches for Rouvy, self-contained under /opt
-	pkgver = 11.18.rouvy0.1.1
+	pkgver = 11.18.rouvy0.1.2
 	pkgrel = 1
 	url = https://github.com/evanjt/rouvy-linux
 	arch = x86_64
@@ -70,8 +70,8 @@ pkgbase = wine-rouvy
 	options = !lto
 	options = !staticlibs
 	options = pestrip
-	source = wine::git+https://github.com/evanjt/wine.git#tag=wine-11.18-rouvy-0.1.1
-	source = rouvy-linux::git+https://github.com/evanjt/rouvy-linux.git#tag=v0.1.2
+	source = wine::git+https://github.com/evanjt/wine.git#tag=wine-11.18-rouvy-0.1.2
+	source = rouvy-linux::git+https://github.com/evanjt/rouvy-linux.git#tag=v0.1.3
 	sha512sums = SKIP
 	sha512sums = SKIP
 
