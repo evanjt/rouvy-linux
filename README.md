@@ -11,7 +11,34 @@ A proof of concept. Not affiliated with Rouvy or the Wine project.
 
 ## Install
 
-Install the build dependencies first. Arch:
+```bash
+git clone https://github.com/evanjt/rouvy-linux.git
+cd rouvy-linux/scripts
+wget https://cdn.rouvy.com/update/Rouvy_Installer.exe
+./install.sh --installer Rouvy_Installer.exe
+```
+
+`install.sh` downloads a prebuilt patched Wine (x86_64, glibc 2.35 or
+newer), checks it runs, then runs the Rouvy installer. When the installer
+starts Rouvy, close it. Everything goes under `~/.local/share/rouvy-linux`.
+
+Start Rouvy and log in:
+
+```bash
+rouvy
+```
+
+The Rouvy entry in your application menu and the desktop shortcut the
+installer adds work too. All of them run the patched Wine.
+
+If the download link stops working, get the installer from your Rouvy
+account with your browser's user agent set to Windows.
+`./install.sh --uninstall` removes everything again.
+
+### Build Wine from source
+
+On an older or non-x86_64 system, or to build Wine yourself, install the
+build dependencies and add `--build`. Arch:
 
 ```bash
 sudo pacman -S --needed base-devel git mingw-w64-gcc bluez bluez-utils \
@@ -37,29 +64,10 @@ sudo apt install build-essential git gcc-mingw-w64 g++-mingw-w64 bison \
 Then:
 
 ```bash
-git clone https://github.com/evanjt/rouvy-linux.git
-cd rouvy-linux/scripts
-wget https://cdn.rouvy.com/update/Rouvy_Installer.exe
-./install.sh --installer Rouvy_Installer.exe
+./install.sh --build --installer Rouvy_Installer.exe
 ```
 
-`install.sh` checks for the build tools first and prints the command to
-install any that are missing. Then it builds Wine (minutes on a fast
-machine, up to an hour on a slow one) and runs the Rouvy installer. When the installer starts Rouvy, close it.
-Everything goes under `~/.local/share/rouvy-linux`.
-
-Start Rouvy and log in:
-
-```bash
-rouvy
-```
-
-The Rouvy entry in your application menu and the desktop shortcut the
-installer adds work too. All of them run the patched Wine.
-
-If the download link stops working, get the installer from your Rouvy
-account with your browser's user agent set to Windows.
-`./install.sh --uninstall` removes everything again.
+The build takes minutes on a fast machine, up to an hour on a slow one.
 
 ### Tested with
 
