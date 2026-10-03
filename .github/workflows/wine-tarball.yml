@@ -68,7 +68,7 @@ jobs:
           PATH="/usr/lib/ccache:$PATH" ../wine/configure --prefix="$PREFIX" \
             --enable-archs=x86_64,i386 --disable-tests \
             CFLAGS=-O2 CROSSCFLAGS=-O2
-          grep -q 'checking for DBUS.*yes' config.log || { echo 'D-Bus not found, Bluetooth would be missing' >&2; exit 1; }
+          grep -q 'define SONAME_LIBDBUS_1' include/config.h || { echo 'D-Bus not found, Bluetooth would be missing' >&2; exit 1; }
 
       - name: Build
         run: |

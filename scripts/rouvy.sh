@@ -115,13 +115,15 @@ if [[ -n $INSTALLER ]]; then
     fi
     [[ -f $INSTALLER ]] || { echo "No installer at $INSTALLER" >&2; exit 1; }
     mkdir -p "$WINEPREFIX" "$ROUVY_HOME/logs"
+    INSTALL_LOG="$ROUVY_HOME/logs/installer.log"
     echo "Prefix: $WINEPREFIX"
-    wineboot -u >/dev/null 2>&1
+    wineboot -u >"$INSTALL_LOG" 2>&1
     # The Rouvy BLE plugin only enables its WinRT path on Windows 10.
-    winecfg -v win10
+    winecfg -v win10 >>"$INSTALL_LOG" 2>&1
     wineserver -w
-    echo "Running the Rouvy installer, close Rouvy when it opens at the end"
-    wine "$INSTALLER"
+    echo "Running the Rouvy installer. When it finishes and starts Rouvy, close Rouvy."
+    echo "Wine output: $INSTALL_LOG"
+    wine "$INSTALLER" >>"$INSTALL_LOG" 2>&1
     wineserver -w
     rewrite_wine_entries
     copy_rouvy_icon

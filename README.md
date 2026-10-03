@@ -11,28 +11,34 @@ A proof of concept. Not affiliated with Rouvy or the Wine project.
 
 ## Install
 
-Download `RouvySetup.exe` from your Rouvy account, then:
-
 ```bash
 git clone https://github.com/evanjt/rouvy-linux.git
-cd rouvy-linux
-scripts/install.sh --installer ~/Downloads/RouvySetup.exe
+cd rouvy-linux/scripts
+wget https://cdn.rouvy.com/update/Rouvy_Installer.exe
+./install.sh --installer Rouvy_Installer.exe
+```
+
+`install.sh` checks for the build tools first and prints the command to
+install any that are missing. Then it builds Wine (minutes on a fast
+machine, up to an hour on a slow one) and runs the Rouvy installer. When the installer starts Rouvy, close it.
+Everything goes under `~/.local/share/rouvy-linux`.
+
+Start Rouvy and log in:
+
+```bash
 rouvy
 ```
 
-The Wine build takes about an hour. To skip it, unpack the tarball from
-the latest release and add `--skip-build`:
+The Rouvy entry in your application menu and the desktop shortcut the
+installer adds work too. All of them run the patched Wine.
 
-```bash
-mkdir -p ~/.local/share/rouvy-linux/wine
-tar -xJf wine-rouvy-v0.1.0-x86_64.tar.xz --strip-components=1 -C ~/.local/share/rouvy-linux/wine
-scripts/install.sh --installer ~/Downloads/RouvySetup.exe --skip-build
-```
+If the download link stops working, get the installer from your Rouvy
+account with your browser's user agent set to Windows.
+`./install.sh --uninstall` removes everything again.
 
-`scripts/install.sh --uninstall` removes everything. On Arch,
-`cd packaging && makepkg -si` installs the same Wine to `/opt/wine-rouvy`.
+### Tested with
 
-Needs BlueZ 5.48 or newer. Tested with:
+Needs BlueZ 5.48 or newer.
 
 | Rouvy | rouvy-linux | Wine fork | BlueZ | Kernel |
 |---|---|---|---|---|
@@ -69,6 +75,13 @@ rfkill unblock bluetooth
 ```
 
 With two adapters, pick one with `ROUVY_BT_ADAPTER=hci1 rouvy`.
+
+A sensor that Rouvy finds but leaves on "connecting" for good usually
+means the kernel's Bluetooth stack is stuck. Reboot. A connect normally
+takes a few seconds.
+
+Don't switch windows while Rouvy connects. When its window regains focus,
+it drops the sensor and starts over.
 
 Each launch writes a Wine log to `~/.local/share/rouvy-linux/logs/`. Add
 the Bluetooth driver's trace with:
@@ -112,7 +125,7 @@ mkdir ../wine-build2 && cd ../wine-build2
 ../wine/configure --enable-archs=x86_64,i386 --disable-tests
 make -j"$(nproc)"
 cd ../rouvy-linux
-scripts/dev-wine.sh wine ~/Downloads/RouvySetup.exe
+scripts/dev-wine.sh wine ~/Downloads/Rouvy_Installer.exe
 scripts/dev-wine.sh winecfg -v win10
 scripts/run-rouvy.sh
 ```
