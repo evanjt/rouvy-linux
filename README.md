@@ -81,10 +81,23 @@ Needs BlueZ 5.48 or newer.
 
 | Rouvy | rouvy-linux | Wine fork | BlueZ | Kernel |
 |---|---|---|---|---|
+| 4.8.4.564 | v0.1.4 | wine-11.19-rouvy-0.1.4 | 5.88 | 7.2 |
 | 4.7.2.541 | v0.1.3 | wine-11.18-rouvy-0.1.2 | 5.87 | 7.2 |
 
 Rouvy updates itself, so the launcher warns when the installed version
 is not the one above.
+
+### Video
+
+Rouvy decodes the route video on the GPU when Wine's Vulkan renderer runs
+and the driver has Vulkan video decode. The launcher asks for Vulkan, and
+Wine falls back to OpenGL by itself without a capable Vulkan device. Rouvy
+then decodes the video on the CPU, as before. If the picture looks wrong,
+force OpenGL:
+
+```bash
+WINE_D3D_CONFIG=renderer=gl rouvy
+```
 
 ## Riding
 
@@ -126,10 +139,10 @@ Don't switch windows while Rouvy connects. When its window regains focus,
 it drops the sensor and starts over.
 
 Each launch writes a Wine log to `~/.local/share/rouvy-linux/logs/`. Add
-the Bluetooth driver's trace with:
+the Bluetooth trace with:
 
 ```bash
-WINEDEBUG=-all,+timestamp,+winebth rouvy
+rouvy --debug
 ```
 
 To record BlueZ and the HCI trace for a whole ride (asks for sudo once,
@@ -158,11 +171,11 @@ Attach that and the Wine log to an issue, with your Rouvy version.
 
 ## Development
 
-The Wine changes live on the fork at tag `wine-11.18-rouvy-0.1.2`. Build
+The Wine changes live on the fork at tag `wine-11.19-rouvy-0.1.4`. Build
 it beside this repository and never `make install` it:
 
 ```bash
-git clone --branch wine-11.18-rouvy-0.1.2 https://github.com/evanjt/wine.git ../wine
+git clone --branch wine-11.19-rouvy-0.1.4 https://github.com/evanjt/wine.git ../wine
 mkdir ../wine-build2 && cd ../wine-build2
 ../wine/configure --enable-archs=x86_64,i386 --disable-tests
 make -j"$(nproc)"
@@ -181,7 +194,7 @@ block commits of compiled binaries.
 ## Limitations
 
 ANT+ over USB is untested, Wahoo direct connect over the network does
-not work, and the fork targets Wine 11.18 only.
+not work, and the fork targets Wine 11.19 only.
 
 ## Licence
 

@@ -6,6 +6,7 @@
 # Usage:
 #   rouvy.sh                                  start Rouvy
 #   rouvy.sh --capture                        start Rouvy and record BlueZ and HCI for the ride
+#   rouvy.sh --debug                          start Rouvy with the Bluetooth trace in the Wine log
 #   rouvy.sh --installer ~/Downloads/RouvySetup.exe   create the prefix and install Rouvy
 #   rouvy.sh com.rouvy://...                  hand a browser login link to the running Rouvy
 #
@@ -16,12 +17,16 @@
 #   ROUVY_LOG           the Wine log, default $ROUVY_HOME/logs/rouvy-<stamp>.log
 #   ROUVY_CAPTURE_ROOT  where a capture goes, default $ROUVY_HOME/captures
 #   ROUVY_CAPTURE       1 is the same as --capture, btmon asks sudo once
+#   WINE_D3D_CONFIG     renderer=gl forces OpenGL, the default is Vulkan
 ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
 ROUVY_HOME="${ROUVY_HOME:-$HOME/.local/share/rouvy-linux}"
 WINE_DIR="${ROUVY_WINE:-$ROUVY_HOME/wine}"
 BUILD="${ROUVY_WINE_BUILD:-}"
 export WINEPREFIX="${ROUVY_PREFIX:-$ROUVY_HOME/prefix}"
 export WINEDEBUG="${WINEDEBUG:--all}"
+# The patched Wine decodes Rouvy's video on the GPU only under Vulkan, and
+# falls back to OpenGL itself when there is no capable Vulkan device.
+export WINE_D3D_CONFIG="${WINE_D3D_CONFIG:-renderer=vulkan}"
 APP="$WINEPREFIX/drive_c/Program Files/VirtualTraining/Rouvy"
 STAMP=$(date +%Y%m%d-%H%M%S)
 LOG="${ROUVY_LOG:-$ROUVY_HOME/logs/rouvy-$STAMP.log}"
@@ -30,7 +35,7 @@ CAPTURE_DIR="${ROUVY_CAPTURE_ROOT:-$ROUVY_HOME/captures}/ride-$STAMP"
 INSTALLER=""
 OPEN=""
 
-usage() { sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+usage() { sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 
 # winemenubuilder writes menu and desktop entries for the prefix that run
 # whatever wine is on PATH, usually a system Wine without the Bluetooth
@@ -70,6 +75,7 @@ copy_rouvy_icon() {
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --capture) CAPTURE=1; shift ;;
+        --debug) WINEDEBUG=-all,+timestamp,+winebth,+bluetooth,+bluetoothapis; shift ;;
         --installer) INSTALLER=$(readlink -f "$2"); shift 2 ;;
         --open) OPEN=$2; shift 2 ;;
         com.rouvy:*) OPEN=$1; shift ;;
@@ -140,6 +146,7 @@ copy_rouvy_icon
 mkdir -p "$(dirname "$LOG")"
 LOG="$(cd "$(dirname "$LOG")" && pwd -P)/$(basename "$LOG")"
 [[ -n "${ROUVY_BT_ADAPTER:-}" ]] && echo "Bluetooth adapter: $ROUVY_BT_ADAPTER"
+[[ $WINEDEBUG == -all ]] || echo "Wine log: $LOG"
 VERSION=$("$ROOT/scripts/rouvy-version.sh" "$WINEPREFIX" || true)
 KNOWN=$("$ROOT/scripts/rouvy-version.sh" --known)
 echo "Rouvy $VERSION, known good $KNOWN"
